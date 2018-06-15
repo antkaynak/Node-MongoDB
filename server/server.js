@@ -9,6 +9,8 @@ const {User} = require('./model/user');
 
 const app = express();
 
+const port = process.env.PORT || 8080;
+
 //use express middleware to convert user data JSON with library body parser
 app.use(bodyParser.json());
 
@@ -31,7 +33,7 @@ app.get('/todos/:id', (req,res)=>{
         if(!todo){
             return res.status(400).send('Todo with the id not found ' + id);
         }
-        res.status(200).send(todo);
+        res.status(200).send({todo});
     }, (err)=>{
         console.log('An error occurred fetching user with id'+ req.params.id+ ' \n', err);
         res.status(400).send(err);
@@ -53,6 +55,6 @@ app.post('/todos', (req,res)=>{
 });
 
 
-app.listen(8080, ()=>   {
-    console.log('Started on port 8080');
+app.listen(port, ()=>   {
+    console.log(`Started on port: ${port}`);
 });
