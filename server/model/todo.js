@@ -1,7 +1,10 @@
 
-const {mongoose} = require('../db/mongoose');
+//const {mongoose} = require('../db/mongoose');
+const mongoose = require('mongoose'); 
 
-const Todo = mongoose.model('Todo', {
+const Schema = mongoose.Schema;
+
+const Todo = mongoose.model('Todo', new Schema({
     text: {
         type: String,
         required: true,
@@ -16,7 +19,7 @@ const Todo = mongoose.model('Todo', {
         type: Number,
         default: null
     }
-});
+}));
 
 
 module.exports = {
