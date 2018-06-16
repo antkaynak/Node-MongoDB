@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const _ = require('lodash');
+const bcryptjs = require('bcryptjs');
 
 const Schema = mongoose.Schema;
 const userSchema =  new Schema({
@@ -65,6 +66,18 @@ userSchema.methods.generateAuthToken = function(){
     return user.save().then(()=> token);  
 };
 
+userSchema.methods.removeToken  = function(token){
+    const user = this;
+
+    return user.update({
+        $pull:{
+            tokens:{
+                token: token
+            }
+        }
+    });
+};
+
  //static because we dont access this via a User object but directly User schema
 userSchema.statics.findByToken = function(token){
     const User = this;
@@ -84,6 +97,43 @@ userSchema.statics.findByToken = function(token){
         'tokens.access': 'auth'
     });
 }
+
+userSchema.statics.findByCredentials = function(email,password){
+    const User = this;
+    return User.findOne({email}).then((user)=>{
+        if(!user){
+            return Promise.reject(); //fires the catch block in the controller
+        }
+
+        return new Promise((resolve,reject)=>{
+            bcryptjs.compare(password,user.password, (err, response)=>{
+                if(response){
+                    resolve(user);
+                }else{
+                    reject();
+                }
+            });
+        });
+    });
+};
+
+//run event before saving
+userSchema.pre('save', function(next){
+    const user = this;
+
+    //if the password is modified ( e.g. not hashed )
+    if(user.isModified('password')){
+        bcryptjs.genSalt(10, (err,salt)=>{
+            bcryptjs.hash(user.password,salt, (err, hash)=>{
+                user.password = hash;
+                next();
+            });
+        });
+    }else{
+        next();
+    }
+});
+
 
 const User = mongoose.model('User', userSchema);
 

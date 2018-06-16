@@ -6,6 +6,7 @@ const _ = require('lodash');
 const {mongoose} = require('./db/mongoose');
 const {Todo} = require('./model/todo');
 const {User} = require('./model/user');
+const {authenticate} = require('./auth/authenticate');
 
 
 const app = express();
@@ -128,6 +129,29 @@ app.post('/users/', (req,res)=>{
     })
     .catch((err)=>{
         res.status(400).send(err);
+    });
+});
+
+app.post('/users/login', (req,res)=>{
+    const body = _.pick(req.body, ['email','password']);
+
+    User.findByCredentials(body.email,body.password)
+    .then((user)=>{
+        return user.generateAuthToken().then((token)=>{
+            res.header('x-auth', token).status(200).send(user);
+        });
+    })
+    .catch((err)=>{
+        res.status(400).send();
+    });
+});
+
+app.delete('/users/me/logout', authenticate, (req,res)=>{
+    req.user.removeToken(req.token)
+    .then(()=>{
+        res.status(200).send();
+    }, ()=>{
+        res.status(400).send();
     });
 });
 
