@@ -37,7 +37,7 @@ app.get('/todos/:id', (req,res)=>{
     }, (err)=>{
         console.log('An error occurred fetching user with id'+ req.params.id+ ' \n', err);
         res.status(400).send(err);
-    })
+    });
 });
 
 app.post('/todos', (req,res)=>{
@@ -51,6 +51,23 @@ app.post('/todos', (req,res)=>{
     }, (err)=>{
         console.log('An error occurred. ',err);
         res.status(400).send(`An error occurred. ${err}`);
+    });
+});
+
+app.delete('/todos/:id', (req,res)=>{
+    console.log('DELETE /todos/:id', req.params);
+    const id = req.params.id;
+    if(!ObjectID.isValid(id)){
+        return res.status(404).send('Id is not valid.');
+    }
+    Todo.findByIdAndRemove(id).then((todo)=>{
+        if(!todo){
+            return res.status(400).send('Todo with the id not found ' + id);
+        }
+        res.status(200).send({todo});
+    }, (err)=>{
+        console.log('An error occurred deleting user with id'+ req.params.id+ ' \n', err);
+        res.status(400).send(err);
     })
 });
 

@@ -26,3 +26,20 @@ Todo.findById(id).then((todo)=> {
     }
     console.log(todo)
 }, (err)=> console.log(err));
+
+
+/* Deletion */
+
+//returns the deleted doc
+Todo.findOneAndRemove({}).then((todo)=> {
+    if(!todo){
+    console.log('Id does not exist');
+    }
+    console.log(todo)
+}, (err)=> console.log(err));
+Todo.findByIdAndRemove(id).then((todo)=> {
+    if(!todo){
+    console.log('Id does not exist');
+    }
+    console.log(todo)
+}, (err)=> console.log(err));
