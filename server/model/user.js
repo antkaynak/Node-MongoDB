@@ -2,10 +2,11 @@
 //const {mongoose} = require('../db/mongoose');
 const mongoose = require('mongoose');
 const validator = require('validator');
+const jwt = require('jsonwebtoken');
+const _ = require('lodash');
 
 const Schema = mongoose.Schema;
-
-const User = mongoose.model('User', new Schema({
+const userSchema =  new Schema({
     email: {
         type: String,
         required: true,
@@ -35,7 +36,38 @@ const User = mongoose.model('User', new Schema({
             required: true
         }
     }]
-}));
+});
+
+//overriding json conversion to hide secret data
+userSchema.methods.toJSON = function(){
+    const user = this;
+    const userObject = user.toObject();
+
+    return _.pick(userObject, ['_id', 'email']);
+}
+
+//not using arrow function because we want to use 'this' keyword
+userSchema.methods.generateAuthToken = function(){ 
+    const user = this;
+    const access = 'auth';
+    const token = jwt.sign({
+        _id: user._id.toHexString(),
+        access
+    }, 'abc123').toString();
+
+    //user.tokens.push({
+    //    access,
+    //    token
+    //});
+
+    user.tokens = user.tokens.concat([{access,token}]);
+
+    return user.save().then(()=> token);  
+};
+
+const User = mongoose.model('User', userSchema);
+
+
 
 module.exports = {
     User
