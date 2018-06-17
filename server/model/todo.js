@@ -18,6 +18,10 @@ const Todo = mongoose.model('Todo', new Schema({
     completedAt: {
         type: Number,
         default: null
+    },
+    _creator: {
+        required: true,
+        type: mongoose.Schema.Types.ObjectId //this property is an id of the user
     }
 }));
 
